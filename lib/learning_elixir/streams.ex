@@ -5,18 +5,13 @@ defmodule LucasNumbers do
 
   E.g.: 2, 1, 3, 4, 7, 11, 18, 29, ...
   """
-  def generate(wrong_arg) when not(is_integer(wrong_arg)) or wrong_arg < 1, do: raise ArgumentError, "count must be specified as an integer >= 1"
-  def generate(1), do: [2]
-  def generate(2), do: [2, 1]
-  def generate(count) do
-    stop = count + 1
-    Stream.unfold([2 | generate(2)], fn
-      [^stop, _, _] -> nil
-      [index, second_to_last, last] -> {[index, second_to_last, last], [index + 1, last, second_to_last + last]}
+
+  def generate(count) when is_integer(count) and count >= 1 do
+    Stream.unfold({2,1}, fn
+      {second_to_last, last} -> {second_to_last, {last, second_to_last + last}}
     end)
-    |> Stream.drop(1)
-    |> Stream.map(fn [_, _, n] -> n end)
-    |> (&(Stream.concat(generate(2), &1))).()
+    |> Stream.take(count)
     |> Enum.to_list()
   end
+  def generate(_), do: raise ArgumentError, "count must be specified as an integer >= 1"
 end
