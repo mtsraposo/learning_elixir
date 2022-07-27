@@ -5,46 +5,31 @@ defmodule AllYourBase do
   """
 
   @spec convert(list, integer, integer) :: {:ok, list} | {:error, String.t()}
+  def convert(digits, input_base, output_base) when output_base < 2, do: {:error, "output base must be >= 2"}
+  def convert(digits, input_base, output_base) when input_base < 2, do: {:error, "input base must be >= 2"}
   def convert(digits, input_base, output_base) do
-    cond do
-      output_base < 2 -> {:error, "output base must be >= 2"}
-      input_base < 2 -> {:error, "input base must be >= 2"}
-      not valid_digits?(digits, input_base) -> {:error, "all digits must be >= 0 and < input base"}
-      true -> {:ok, convert(digits, input_base, output_base, true)}
+    if valid_digits?(digits, input_base) do
+      {:ok, do_convert(digits, input_base, output_base)}
+    else
+      {:error, "all digits must be >= 0 and < input base"}
     end
   end
-  defp convert(digits, input_base, output_base, true) do
+
+  defp valid_digits?(digits, input_base), do: Enum.find(digits, &(&1 < 0 or &1 >= input_base)) == nil
+  defp do_convert(digits, input_base, output_base) do
     digits
-    |> convert_to_base10(input_base, Enum.count(digits), 0)
-    |> convert_from_base10(output_base, [0])
-  end
-  defp valid_digits?(digits, input_base) do
-    Enum.filter(digits, fn d -> d < 0 or d >= input_base end) == []
+    |> to_base10(input_base, 0)
+    |> from_base10(output_base, [])
   end
 
-  defp convert_to_base10(digits, input_base, 0, acc), do: acc
-  defp convert_to_base10(digits, 10, length, acc), do: Integer.undigits(digits)
-  defp convert_to_base10([digit | tail], input_base, length, acc) do
-    new_acc = acc + trunc(digit * :math.pow(input_base, length - 1))
-    convert_to_base10(tail, input_base, length - 1, new_acc)
-  end
+  defp to_base10([], _base, []), do: [0]
+  defp to_base10([], _base, acc), do: acc
+  defp to_base10(digits, 10, _acc), do: Integer.undigits(digits)
+  defp to_base10([digit | tail], base, acc), do: to_base10(tail, base, acc * base + digit)
 
-  defp convert_from_base10(0, output_base, acc), do: Enum.reverse(acc)
-  defp convert_from_base10(n, 10, acc), do: Integer.digits(n)
-  defp convert_from_base10(n, output_base, acc) do
-    exp = :math.log(n) / :math.log(output_base) |> trunc()
-    rest = n - :math.pow(output_base, exp) |> trunc()
-    digit = 1 + (rest / :math.pow(output_base, exp) |> trunc())
-    next_n = n - digit * :math.pow(output_base, exp) |> trunc()
-    new_acc = accumulate(exp, digit, acc)
-    convert_from_base10(next_n, output_base, new_acc)
-  end
-
-  defp accumulate(0, digit, [0]), do: [digit]
-  defp accumulate(exp, digit, [0]) do
-    initialize = for _ <- 0..exp-1, do: 0
-    initialize ++ [digit]
-  end
-  defp accumulate(exp, digit, acc), do: List.replace_at(acc, exp, digit)
+  defp from_base10(0, _base, []), do: [0]
+  defp from_base10(0, _base, acc), do: acc
+  defp from_base10(n, 10, _acc), do: Integer.digits(n)
+  defp from_base10(n, base, acc), do: from_base10(div(n, base), base, [rem(n, base) | acc])
 
 end
