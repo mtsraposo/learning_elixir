@@ -23,14 +23,19 @@ defmodule SecretHandshake do
   @spec commands(code :: integer) :: list(String.t())
   def commands(code) do
     code
-    |> Integer.digits(2)
-    |> Enum.reverse()
-    |> Stream.with_index()
+    |> from_least_significant_bit()
     |> Enum.reduce([], &prepend_handshake/2)
     |> Enum.reverse()
   end
 
-  defp prepend_handshake({0, bit}, handshakes) do
+  defp from_least_significant_bit(code) do
+    code
+    |> Integer.digits(2)
+    |> Enum.reverse()
+    |> Stream.with_index()
+  end
+
+  defp prepend_handshake({0, _bit}, handshakes) do
     handshakes
   end
 
@@ -43,7 +48,7 @@ defmodule SecretHandshake do
     [Map.get(@bit_handshake, bit) | handshakes]
   end
 
-  defp prepend_handshake({1, bit}, handshakes) do
+  defp prepend_handshake({1, _bit}, handshakes) do
     handshakes
   end
 
