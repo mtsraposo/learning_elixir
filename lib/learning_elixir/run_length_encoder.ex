@@ -1,4 +1,6 @@
 defmodule RunLengthEncoder do
+  @letters_or_whitespace "a-zA-Z\s"
+
   @doc """
   Generates a string where consecutive elements are represented as a data value and count.
   "AABBBCCCC" => "2A3B4C"
@@ -8,58 +10,38 @@ defmodule RunLengthEncoder do
   """
   @spec encode(String.t()) :: String.t()
   def encode(string) do
-    string
-    |> String.graphemes()
-    |> Enum.reduce([], &group_by_grapheme/2)
-    |> Enum.reverse()
-    |> Enum.reduce("", &prepend_frequency/2)
+    sequences_of_equal_letters_or_whitespace = ~r"([#{@letters_or_whitespace}])\1*"
+    Regex.replace(sequences_of_equal_letters_or_whitespace, string, &encode/2)
   end
 
-  defp group_by_grapheme(char, freqs) do
-    case freqs do
-      [{^char, freq} | tail] -> [{char, freq + 1} | tail]
-      _ -> [{char, 1} | freqs]
-    end
+  defp encode(group, char)
+       when group == char do
+    char
   end
 
-  defp prepend_frequency({char, 1}, encoded) do
-    encoded <> "#{char}"
-  end
-
-  defp prepend_frequency({char, freq}, encoded) do
-    encoded <> "#{freq}#{char}"
+  defp encode(group, char) do
+    "#{String.length(group)}#{char}"
   end
 
   @spec decode(String.t()) :: String.t()
   def decode(string) do
-    {_freq, decoded} = string
-                       |> split_decoders()
-                       |> Enum.reduce({1, ""}, &duplicate_graphemes/2)
-
-    decoded
+    sequences_of_digits_followed_by_letters_or_whitespace = ~r"(\d*)([#{@letters_or_whitespace}])"
+    Regex.replace(sequences_of_digits_followed_by_letters_or_whitespace, string, &duplicate/3)
   end
 
-  defp split_decoders(string) do
-    String.split(string, ~r/[a-zA-Z\s]/, include_captures: true, trim: true)
+  defp duplicate(group, freq, char) do
+    freq
+    |> to_integer()
+    |> duplicate(char)
   end
 
-  defp duplicate_graphemes(string, {freq, decoded}) do
-    if string |> represents_integer?() do
-      update_next_frequency(string, decoded)
-    else
-      duplicate_and_reset_frequency(string, freq, decoded)
-    end
+  defp to_integer(freq) do
+    freq
+    |> String.replace(~r{^$}, "1")
+    |> String.to_integer()
   end
 
-  defp represents_integer?(string) do
-    String.match?(string, ~r/^[\d]+$/)
-  end
-
-  defp update_next_frequency(string, decoded) do
-    {String.to_integer(string), decoded}
-  end
-
-  defp duplicate_and_reset_frequency(string, freq, decoded) do
-    {1, decoded <> String.duplicate(string, freq)}
+  defp duplicate(freq, char) do
+    String.duplicate(char, freq)
   end
 end
