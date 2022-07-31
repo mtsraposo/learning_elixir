@@ -8,47 +8,21 @@ defmodule Sublist do
   def compare(_a, []), do: :superlist
 
   def compare(a, b)
-      when length(a) == length(b) do
-    do_compare({a, length(a)}, {b, length(b)})
-    |> invert(:equal_size)
-  end
-
-  def compare(a,b)
       when length(a) > length(b) do
-    do_compare({a, length(a)}, {b, length(b)})
-    |> invert(:larger)
+    if a |> contains?(b), do: :superlist, else: :unequal
   end
 
-  def compare(a,b) do
-    do_compare({b, length(b)}, {a, length(a)})
+  def compare(a, b)
+      when length(a) == length(b) do
+    if a |> contains?(b), do: :equal, else: :unequal
   end
 
-  def invert(:sublist, :equal_size), do: :equal
-  def invert(:sublist, :larger), do: :superlist
-  def invert(relation, _size_comparison), do: relation
-
-  defp do_compare({large, size_large}, {small, size_small}) do
-    index = Enum.find_index(large, fn elem -> elem === hd(small) end)
-    case index do
-      0 -> traverse(index, {large, size_large}, {small, size_small})
-      nil -> :unequal
-      _ -> do_compare({Enum.slice(large, index..-1), size_large}, {small, size_small})
-    end
+  def compare(a, b)
+      when length(a) < length(b) do
+    if b |> contains?(a), do: :sublist, else: :unequal
   end
 
-  defp traverse(index, {large, size_large}, {small, size_small}) do
-    if contained?({large, size_large}, {small, size_small}) do
-      :sublist
-    else
-      do_compare({Enum.slice(large, index+1..-1), size_large}, {small, size_small})
-    end
-  end
-
-  defp contained?({large, _size_large}, {small, size_small}) do
-    intersection_count = Enum.count_until(Enum.zip(large,small),
-      fn {elem_large, elem_small} -> elem_large === elem_small end,
-      size_small)
-    intersection_count == size_small
-  end
+  defp contains?([], _b), do: false
+  defp contains?(a, b), do: List.starts_with?(a, b) || contains?(tl(a), b)
 
 end
