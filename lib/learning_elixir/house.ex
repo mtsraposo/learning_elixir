@@ -20,7 +20,7 @@ defmodule House do
   defp verse(number) do
     number
     |> gen_phrase_components()
-    |> Enum.zip_reduce("", &build_phrase/2)
+    |> Enum.zip_reduce("", &append_phrase/2)
   end
 
   defp gen_phrase_components(number) do
@@ -28,18 +28,18 @@ defmodule House do
   end
 
   defp gen_pronouns(number) do
-    ["This"] ++ List.duplicate(" that", number - 1)
+    ["This" | List.duplicate(" that", number - 1)]
   end
 
   defp gen_verbs(number) do
-    ["is"] ++ (Enum.take(@verbs, number - 1) |> Enum.reverse())
+    ["is" | (Enum.take(@verbs, number - 1) |> Enum.reverse())]
   end
 
   defp gen_objects(number) do
     Enum.take(@objects, number) |> Enum.reverse()
   end
 
-  defp build_phrase([pronoun, verb, object], acc) do
-    "#{acc}#{pronoun} #{verb} the #{object}"
+  defp append_phrase([pronoun, verb, object], acc) do
+    acc <> "#{pronoun} #{verb} the #{object}"
   end
 end
