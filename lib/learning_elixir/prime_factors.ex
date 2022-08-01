@@ -11,7 +11,7 @@ defmodule PrimeFactors do
   def factors_for(1), do: []
 
   def factors_for(number) do
-    1..number
+    1..ceil(:math.sqrt(number) + 1)
     |> Enum.reduce_while({number, [2]}, fn _, acc -> do_factor(acc) end)
   end
 
@@ -22,6 +22,11 @@ defmodule PrimeFactors do
   def do_factor({rest, [2]})
       when rem(rest, 2) == 0 do
     {:cont, {div(rest, 2), [2, 2]}}
+  end
+
+  def do_factor({rest, [potential_factor | _tail] = factors})
+      when potential_factor * potential_factor > rest do
+    {:halt, append_rest_and_return(factors, rest)}
   end
 
   def do_factor({rest, [potential_factor | _tail] = factors})
@@ -41,6 +46,11 @@ defmodule PrimeFactors do
   defp return(factors) do
     factors
     |> Enum.drop(1)
+    |> Enum.reverse()
+  end
+
+  defp append_rest_and_return(factors, rest) do
+    [rest | factors |> Enum.drop(1)]
     |> Enum.reverse()
   end
 
