@@ -44,31 +44,7 @@ defmodule CryptoSquare do
 
   defp transpose(matrix) do
     matrix
-    |> Enum.reduce(%{}, &transpose/2)
-  end
-
-  defp transpose(row, map) do
-    row
-    |> Enum.with_index()
-    |> Enum.reduce(map, &rows_to_cols/2)
-  end
-
-  defp rows_to_cols({elem, col_index}, acc) do
-    acc
-    |> Map.get_and_update(col_index, fn col -> update_map(col, elem) end)
-    |> return_map()
-  end
-
-  defp update_map(nil, elem) do
-    {nil, [elem]}
-  end
-
-  defp update_map(col, elem) do
-    {col, [elem | col]}
-  end
-
-  defp return_map({last_col_elem, map}) do
-    map
+    |> Enum.zip_with(& &1)
   end
 
   defp to_message(transposed) do
@@ -77,7 +53,7 @@ defmodule CryptoSquare do
     |> String.trim_leading()
   end
 
-  defp concat_col({_i, col}, str) do
-    "#{str} #{col |> Enum.reverse() |> Enum.join()}"
+  defp concat_col(col, str) do
+    "#{str} #{col |> Enum.join()}"
   end
 end
