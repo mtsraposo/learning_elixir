@@ -44,31 +44,7 @@ defmodule DiffieHellman do
   end
 
   def generate_private_key(prime_p) do
-    gen_large_random_integer(prime_p)
-  end
-
-  def gen_large_random_integer(n) do
-    n
-    |> Integer.digits()
-    |> random_digits()
-  end
-
-  defp random_digits(digits) do
-    [gen_first_digit(digits) | gen_last_digits(digits)]
-    |> Integer.undigits()
-  end
-
-  defp gen_first_digit(digits) do
-    (hd(digits) - 1)
-    |> max(1)
-    |> :rand.uniform()
-    |> (& &1 - 1).()
-  end
-
-  defp gen_last_digits(digits) do
-    digits
-    |> Enum.drop(1)
-    |> Enum.map(fn d -> :rand.uniform(max(1,d)) - 1 end)
+    :crypto.rand_uniform(1, prime_p)
   end
 
   @doc """
@@ -85,7 +61,7 @@ defmodule DiffieHellman do
   end
 
   def generate_public_key(prime_p, prime_g, private_key) do
-    rem_exp_large_numbers(prime_g, private_key, prime_p)
+    :crypto.mod_pow(prime_g, private_key, prime_p) |> :binary.decode_unsigned()
   end
 
   @doc """
@@ -105,27 +81,7 @@ defmodule DiffieHellman do
   end
 
   def generate_shared_secret(prime_p, public_key_b, private_key_a) do
-    rem_exp_large_numbers(public_key_b, private_key_a, prime_p)
-  end
-
-  defp rem_exp_large_numbers(base, exponent, modulus) do
-    rem_exp_large_numbers(base, exponent, modulus, 1)
-  end
-
-  defp rem_exp_large_numbers(_base, 0, _modulus, rest) do
-    rest
-  end
-
-  defp rem_exp_large_numbers(base, exponent, modulus, rest) do
-    {base, exponent, rest} = update_args(base, exponent, modulus, rest)
-    rem_exp_large_numbers(base, exponent, modulus, rest)
-  end
-
-  defp update_args(base, exponent, modulus, rest) do
-    rest = if(rem(exponent, 2) == 1, do: rem(rest * base, modulus), else: rest)
-    base = rem(base ** 2, modulus)
-    exponent = div(exponent, 2)
-    {base, exponent, rest}
+    :crypto.mod_pow(public_key_b, private_key_a, prime_p) |> :binary.decode_unsigned()
   end
 
 end
