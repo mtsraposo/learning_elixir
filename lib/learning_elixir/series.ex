@@ -3,10 +3,10 @@ defmodule Series do
   Finds the largest product of a given number of consecutive numbers in a given string of numbers.
   """
   @spec largest_product(String.t(), non_neg_integer) :: non_neg_integer
-  def largest_product(number_string, 0), do: 1
+  def largest_product(_number_string, 0), do: 1
 
   def largest_product(number_string, size)
-      when size * 8 > bit_size(number_string) or size < 0 do
+      when size > byte_size(number_string) or size < 0 do
     raise ArgumentError
   end
 
