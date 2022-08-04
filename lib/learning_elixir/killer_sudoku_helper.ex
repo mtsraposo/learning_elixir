@@ -10,8 +10,7 @@ defmodule KillerSudokuHelper do
 
   def combinations(cage) do
     candidate_numbers(cage)
-    |> Enum.map(fn n -> cage |> combinations_containing(n) end)
-    |> merge()
+    |> Enum.flat_map(fn n -> cage |> combinations_containing(n) end)
     |> filter_matching(cage)
     |> drop_duplicates()
   end
@@ -23,11 +22,6 @@ defmodule KillerSudokuHelper do
   defp combinations_containing(cage, n) do
     combinations(%{exclude: [n | cage.exclude], size: cage.size - 1, sum: cage.sum - n})
     |> Enum.map(fn comb -> [n | comb] end)
-  end
-
-  defp merge(combinations) do
-    combinations
-    |> Enum.reduce([], fn combs, merged -> merged ++ combs end)
   end
 
   defp filter_matching(combinations, cage) do
