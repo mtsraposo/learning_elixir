@@ -16,7 +16,24 @@ defmodule Frequency do
 
   defp chunk_tasks(texts, workers) do
     texts
-    |> Enum.flat_map(fn text -> parse(text) |> Enum.chunk_every(workers) end)
+    |> Enum.flat_map(&parse/1)
+    |> distribute_to(workers)
+  end
+
+  defp distribute_to(graphemes, workers)
+       when length(graphemes) == 0 do
+    []
+  end
+
+  defp distribute_to(graphemes, workers) do
+    {chunk_size, rest} = {ceil(length(graphemes) / workers), rem(length(graphemes), workers)}
+    Enum.chunk_every(graphemes, chunk_size)
+    |> (& if rest == 0, do: &1, else: split_first_chunk(&1)).()
+  end
+
+  defp split_first_chunk([head | tail]) do
+    {head, split} = Enum.split(head, div(length(head),2))
+    [head | [split | tail]]
   end
 
   defp parse(text) do
