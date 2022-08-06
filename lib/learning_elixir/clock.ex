@@ -1,7 +1,7 @@
 defmodule Clock do
   defstruct hour: 0, minute: 0
 
-  @hours_in_day 24 * 60
+  @minutes_in_day 24 * 60
 
   defimpl String.Chars do
     def to_string(%Clock{hour: hour, minute: minute}) do
@@ -26,8 +26,8 @@ defmodule Clock do
   defp calc_minutes_from_midnight(hour, minute) do
     minutes = 60 * hour + minute
     if minutes >= 0,
-       do: rem(minutes, @hours_in_day),
-       else: @hours_in_day - rem(abs(minutes), @hours_in_day)
+       do: rem(minutes, @minutes_in_day),
+       else: @minutes_in_day - rem(abs(minutes), @minutes_in_day)
   end
 
   defp to_clock(minutes) do
