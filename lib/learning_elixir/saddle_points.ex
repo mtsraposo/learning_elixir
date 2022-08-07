@@ -3,7 +3,7 @@ defmodule SaddlePoints do
     This is an attempt to find all saddle points in one single pass through the matrix,
     which is achieved by storing and updating the extreme values and indexes found in rows and columns.
     The best case, when all elements are distinct, and worst case, when all elements are equal, runtimes are both O(n * m),
-    assuming map transactions run in linear time.
+    assuming map transactions run in constant time.
   """
 
   @doc """
