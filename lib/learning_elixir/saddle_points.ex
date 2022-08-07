@@ -16,7 +16,7 @@ defmodule SaddlePoints do
   def rows(str) do
     str
     |> String.split("\n")
-    |> Stream.map(&String.split(&1))
+    |> Stream.map(&String.split/1)
     |> Enum.map(fn row -> Enum.map(row, &String.to_integer/1) end)
   end
 
