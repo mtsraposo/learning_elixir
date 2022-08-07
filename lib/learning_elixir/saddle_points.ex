@@ -1,4 +1,11 @@
 defmodule SaddlePoints do
+  @moduledoc """
+    This is an attempt to find all saddle points in one single pass through the matrix,
+    which is achieved by storing and updating the extreme values and indexes found in rows and columns.
+    The best case, when all elements are distinct, and worst case, when all elements are equal, runtimes are both O(n * m),
+    assuming map transactions run in linear time.
+  """
+
   @doc """
   Parses a string representation of a matrix
   to a list of rows
@@ -66,17 +73,17 @@ defmodule SaddlePoints do
     initialize_row_extremes(max_by_row, elem, row_index, col_index)
   end
 
-  defp initialize_row_extremes(max_by_row, elem, row_index, col_index) do
-    Map.put(max_by_row, row_index, {elem, %{col_index => elem}})
-  end
-
   defp update_row(max_by_row, elem, row_index, col_index) do
-    {current_max, indexes} = max_by_row[row_index]
+    {current_max, _col_indexes} = max_by_row[row_index]
     cond do
       elem == current_max -> Map.update!(max_by_row, row_index, &append_index(&1, col_index))
       elem > current_max -> Map.update!(max_by_row, row_index, &replace_with_index(&1, elem, col_index))
       true -> max_by_row
     end
+  end
+
+  defp initialize_row_extremes(max_by_row, elem, row_index, col_index) do
+    Map.put(max_by_row, row_index, {elem, %{col_index => elem}})
   end
 
   defp append_index({current_extreme, indexes}, to_append) do
@@ -92,17 +99,17 @@ defmodule SaddlePoints do
     initialize_col_extremes(min_by_col, elem, row_index, col_index)
   end
 
-  defp initialize_col_extremes(min_by_col, elem, row_index, col_index) do
-    Map.put(min_by_col, col_index, {elem, %{row_index => elem}})
-  end
-
   defp update_col(min_by_col, elem, row_index, col_index) do
-    {current_min, indexes} = min_by_col[col_index]
+    {current_min, _row_indexes} = min_by_col[col_index]
     cond do
       elem == current_min -> Map.update!(min_by_col, col_index, &append_index(&1, row_index))
       elem < current_min -> Map.update!(min_by_col, col_index, &replace_with_index(&1, elem, row_index))
       true -> min_by_col
     end
+  end
+
+  defp initialize_col_extremes(min_by_col, elem, row_index, col_index) do
+    Map.put(min_by_col, col_index, {elem, %{row_index => elem}})
   end
 
   defp extract_indexes({max_by_row, min_by_col}) do
@@ -111,7 +118,7 @@ defmodule SaddlePoints do
 
   defp extract_indexes(map) do
     map
-    |> Enum.map(fn {index, {extreme, indexes}} -> {index, indexes} end)
+    |> Enum.map(fn {index, {_extreme, indexes}} -> {index, indexes} end)
     |> Map.new()
   end
 
