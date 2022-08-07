@@ -1,5 +1,5 @@
 defmodule Triplet do
-  @doc ~S"""
+  @moduledoc ~S"""
   To run in O(sum), it is necessary to reduce the problem by using some algebra.
 
   Using "s" to denote the sum of the triplet and assuming s > 0,
@@ -72,24 +72,15 @@ defmodule Triplet do
     |> Enum.sort()
   end
 
-  @doc """
-    See module documentation (iv).
-  """
   defp gen_search_range_for_b(sum) do
     Range.new(ceil((1 - (2**0.5)/2) * sum),
       min(div(sum, 2) - 1, floor((1 + (2**0.5)/2) * sum)))
   end
 
-  @doc """
-    See module documentation (v).
-  """
   defp a_is_integer?(b, sum) do
     rem(sum ** 2 - 2 * b * sum, 2 * (sum - b)) == 0
   end
 
-  @doc """
-    See module documentation (vi).
-  """
   defp gen_triplet(b, sum) do
     a = div(sum**2 - 2 * b * sum, 2 * (sum - b))
     c = sum - a - b
