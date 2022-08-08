@@ -37,7 +37,7 @@ defmodule Transpose do
   end
 
   defp pad_rows(rows) do
-    with_padding = [{first_row, matrix_width} | _] = calc_padding(rows)
+    with_padding = [{_, matrix_width} | _] = calc_padding(rows)
     with_padding
     |> Stream.map(&pad(&1, matrix_width))
   end
