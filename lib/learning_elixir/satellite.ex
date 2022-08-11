@@ -12,7 +12,7 @@ defmodule Satellite do
   def build_tree(preorder, inorder) do
     with :ok <- same_length?(preorder, inorder),
          {:ok, preorder_elements, inorder_elements} <- unique_elements?(preorder, inorder),
-         {:ok, elements} <- equal_elements?(preorder_elements, inorder_elements) do
+         :ok <- equal_elements?(preorder_elements, inorder_elements) do
       {:ok, find_subtree_split_point({preorder, inorder}) |> build_tree()}
     else
       {:error, message} -> {:error, message}
@@ -50,7 +50,7 @@ defmodule Satellite do
 
   defp equal_elements?(preorder_elements, inorder_elements) do
     if MapSet.equal?(preorder_elements, inorder_elements),
-       do: {:ok, preorder_elements},
+       do: :ok,
        else: {:error, "traversals must have the same elements"}
   end
 
@@ -61,7 +61,7 @@ defmodule Satellite do
   defp build_tree({[], [], nil}), do: {}
   defp build_tree({[root], [root], 0}), do: {{}, root, {}}
 
-  defp build_tree({preorder, inorder, left_size} = traversals) do
+  defp build_tree({preorder, _inorder, _left_size} = traversals) do
     {build_left_subtree(traversals),
       get_root(preorder),
       build_right_subtree(traversals)}
