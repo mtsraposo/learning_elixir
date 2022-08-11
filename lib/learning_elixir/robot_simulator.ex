@@ -63,14 +63,6 @@ defmodule RobotSimulator do
     |> update_position(pos, instruction)
   end
 
-  defp update_position(dir, pos, "A"), do: create(dir, move(dir, pos))
-  defp update_position(dir, pos, _), do: create(dir, pos)
-
-  defp move(:north, {x, y}), do: {x, y + 1}
-  defp move(:east, {x, y}), do: {x + 1, y}
-  defp move(:south, {x, y}), do: {x, y - 1}
-  defp move(:west, {x, y}), do: {x - 1, y}
-
   defp update_direction(direction, instruction) do
     get_direction_id(direction)
     |> calc_new_direction_id(instruction)
@@ -90,6 +82,14 @@ defmodule RobotSimulator do
     @directions
     |> Enum.find_value(fn {dir, i} -> i == id && dir end)
   end
+
+  defp update_position(dir, pos, "A"), do: create(dir, advance(dir, pos))
+  defp update_position(dir, pos, _), do: create(dir, pos)
+
+  defp advance(:north, {x, y}), do: {x, y + 1}
+  defp advance(:east, {x, y}), do: {x + 1, y}
+  defp advance(:south, {x, y}), do: {x, y - 1}
+  defp advance(:west, {x, y}), do: {x - 1, y}
 
   @doc """
   Return the robot's direction.
