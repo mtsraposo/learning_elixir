@@ -142,7 +142,7 @@ defmodule Connect do
 
   defp get_width(board) do
     board
-    |> Enum.reduce(0, fn {row, cols}, max_col -> max(max_col, Enum.max(Map.keys(cols))) end)
+    |> Enum.reduce(0, fn {_row, cols}, max_col -> max(max_col, Enum.max(Map.keys(cols))) end)
   end
 
   defp connects_top_to_bottom?(links, finish_line) do
